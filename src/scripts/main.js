@@ -11,7 +11,7 @@
       this.elements.radioBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
           api.currentBuilding = Number(btn.value)
-          console.log(api.currentBuilding)
+          api.init()
         })
       })
     },
@@ -70,7 +70,7 @@
         ]
       }
     ],
-    currentBuilding: 1,
+    currentBuilding: 0,
     init: function () {
       this.handleData()
     },
@@ -100,7 +100,7 @@
             ?photo dc:type "foto"^^xsd:string .
             ?photo dc:title ?title .
             ?photo foaf:depiction ?img .
-            FILTER REGEX(?title, "${this.buildings[this.currentBuilding].name}") .
+            FILTER REGEX(?title, "${this.buildings[this.currentBuilding].address}") .
             ?photo sem:hasBeginTimeStamp ?date .
             FILTER (?date > "${this.buildings[this.currentBuilding].dateRange[0][0]}"^^xsd:dateTime && ?date < "${this.buildings[this.currentBuilding].dateRange[0][1]}"^^xsd:dateTime)
           }
@@ -147,13 +147,16 @@
           }
           return obj
         })
+        // console.log(`data_poster: ${usefulData}`)
         window.localStorage.setItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_posters`, JSON.stringify(usefulData))
         loaded++
         this.updateLoader(loaded)
       })
       if (window.localStorage.getItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_count`)) {
         limit = JSON.parse(window.localStorage.getItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_count`))
-        let randomNum = helper.randomize(1, limit)
+        console.log(limit)
+        let randomNum = helper.randomize(1, limit) - 1
+        console.log(`max: ${limit}`, `Number: ${randomNum}`)
         this.getData(this.generateUrl('background', randomNum)).then((result) => {
           let oldUrl = JSON.parse(result).results.bindings[0].img.value
           let newUrl = this.storeBackground(oldUrl)
@@ -165,10 +168,12 @@
         this.getData(this.generateUrl('count')).then((result) => {
           limit = JSON.parse(result).results.bindings[0].count.value
           window.localStorage.setItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_count`, JSON.stringify(limit))
+          console.log(`max: ${limit}`)
           loaded++
           this.updateLoader(loaded)
         }).then(() => {
-          this.getData(this.generateUrl('background', helper.randomize(1, limit))).then((result) => {
+          this.getData(this.generateUrl('background', helper.randomize(1, limit) - 1)).then((result) => {
+            console.log(`newRandom`)
             loaded++
             this.updateLoader(loaded)
           })
