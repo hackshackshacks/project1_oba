@@ -15,7 +15,17 @@ body {
   z-index: -1;
   filter: grayscale(1);
 }
-
+form {
+  input {
+    display: none;
+    &+ label {
+      padding: 1em;
+    }
+    &:checked + label {
+      background: red;
+    }
+  }
+}
 #loader-wrapper {
   position: fixed;
   top: 0;

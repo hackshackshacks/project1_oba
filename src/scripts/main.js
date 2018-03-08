@@ -1,16 +1,25 @@
 (() => {
   const app = {
     elements: {
-      radioBtns: document.querySelectorAll('input[type="radio"]')
+      buildingBtns: document.querySelectorAll('[name="building"]'),
+      dateBtns: document.querySelectorAll('[name="date"]'),
+      background: document.querySelector('.background'),
+      posters: document.querySelector('.posters')
     },
     init: function () {
       api.init()
       this.handleEvents()
     },
     handleEvents: function () {
-      this.elements.radioBtns.forEach((btn) => {
+      this.elements.buildingBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
-          api.currentBuilding = Number(btn.value)
+          api.setCurrentBuilding(Number(btn.value))
+          api.init()
+        })
+      })
+      this.elements.dateBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          api.currentDate = Number(btn.value)
           api.init()
         })
       })
@@ -26,9 +35,11 @@
       return el
     },
     render: function (data) {
+      let posters = []
       data.forEach((item) => {
-        document.body.insertAdjacentHTML('beforeend', this.createPoster(item.title.value, item.date.value, item.img.value))
+        posters.push(this.createPoster(item.title, item.date, item.url))
       })
+      helper.replaceHTML(this.elements.posters, posters)
     }
   }
   const api = {
@@ -57,22 +68,29 @@
           ['1980-05-23T10:20:13+05:30', '1990-05-23T10:20:13+05:30'],
           ['1990-05-23T10:20:13+05:30', '2100-05-23T10:20:13+05:30']
         ]
-      },
-      {
-        name: 'Nog ergens',
-        address: 'Weteringschans 6',
-        dateRange: [
-          ['1968-05-23T10:20:13+05:30', '1972-05-23T10:20:13+05:30'],
-          ['1972-05-23T10:20:13+05:30', '1975-05-23T10:20:13+05:30'],
-          ['1975-05-23T10:20:13+05:30', '1980-05-23T10:20:13+05:30'],
-          ['1980-05-23T10:20:13+05:30', '1990-05-23T10:20:13+05:30'],
-          ['1990-05-23T10:20:13+05:30', '2100-05-23T10:20:13+05:30']
-        ]
       }
     ],
+    dateRange: [
+      ['1970-05-23T10:20:13+05:30', '1980-05-23T10:20:13+05:30'],
+      ['1980-05-23T10:20:13+05:30', '1990-05-23T10:20:13+05:30'],
+      ['1990-05-23T10:20:13+05:30', '2000-05-23T10:20:13+05:30'],
+      ['2000-05-23T10:20:13+05:30', '2100-05-23T10:20:13+05:30']
+    ],
     currentBuilding: 0,
+    currentDate: 0,
     init: function () {
+      if (window.localStorage.getItem('currentBuilding')) {
+        this.currentBuilding = JSON.parse(window.localStorage.getItem('currentBuilding'))
+        app.elements.buildingBtns[this.currentBuilding].checked = true
+      } else {
+        this.currentBuilding = 0
+        window.localStorage.setItem('currentBuilding', JSON.stringify(0))
+      }
       this.handleData()
+    },
+    setCurrentBuilding: function (number) {
+      window.localStorage.setItem('currentBuilding', JSON.stringify(number))
+      return number
     },
     generateUrl: function (type, limit) {
       let query
@@ -88,6 +106,7 @@
             ?poster foaf:depiction ?img .
             FILTER REGEX(?title, "${this.buildings[this.currentBuilding].name}") .
             ?poster sem:hasBeginTimeStamp ?date .
+            FILTER (?date > "${this.dateRange[this.currentDate][0]}"^^xsd:dateTime && ?date < "${this.dateRange[this.currentDate][1]}"^^xsd:dateTime)
           }
           ORDER BY ?date
         `
@@ -102,7 +121,7 @@
             ?photo foaf:depiction ?img .
             FILTER REGEX(?title, "${this.buildings[this.currentBuilding].address}") .
             ?photo sem:hasBeginTimeStamp ?date .
-            FILTER (?date > "${this.buildings[this.currentBuilding].dateRange[0][0]}"^^xsd:dateTime && ?date < "${this.buildings[this.currentBuilding].dateRange[0][1]}"^^xsd:dateTime)
+            FILTER (?date > "${this.buildings[this.currentBuilding].dateRange[this.currentDate][0]}"^^xsd:dateTime && ?date < "${this.buildings[this.currentBuilding].dateRange[this.currentDate][1]}"^^xsd:dateTime)
           }
         `
       } else if (type === 'background') {
@@ -117,12 +136,13 @@
             ?photo foaf:depiction ?img .
             FILTER REGEX(?title, "${this.buildings[this.currentBuilding].address}") .
             ?photo sem:hasBeginTimeStamp ?date .
-            FILTER (?date > "${this.buildings[this.currentBuilding].dateRange[0][0]}"^^xsd:dateTime && ?date < "${this.buildings[this.currentBuilding].dateRange[0][1]}"^^xsd:dateTime)
+            FILTER (?date > "1968-05-23T10:20:13+05:30"^^xsd:dateTime && ?date < "2017-05-23T10:20:13+05:30"^^xsd:dateTime)
           }
           ORDER BY ?date OFFSET ${limit} LIMIT 1
         `
       }
       let encodedQuery = encodeURIComponent(query)
+      console.log(query)
       return `https://api.data.adamlink.nl/datasets/AdamNet/all/services/endpoint/sparql?default-graph-uri=&query=${encodedQuery}&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on`
     },
     getData: function (url) {
@@ -147,33 +167,39 @@
           }
           return obj
         })
-        // console.log(`data_poster: ${usefulData}`)
         window.localStorage.setItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_posters`, JSON.stringify(usefulData))
+        app.render(usefulData)
         loaded++
         this.updateLoader(loaded)
       })
+      let randomNum
       if (window.localStorage.getItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_count`)) {
         limit = JSON.parse(window.localStorage.getItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_count`))
-        console.log(limit)
-        let randomNum = helper.randomize(1, limit) - 1
-        console.log(`max: ${limit}`, `Number: ${randomNum}`)
-        this.getData(this.generateUrl('background', randomNum)).then((result) => {
-          let oldUrl = JSON.parse(result).results.bindings[0].img.value
-          let newUrl = this.storeBackground(oldUrl)
-          window.localStorage.setItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_background-${randomNum}`, JSON.stringify(newUrl))
-          loaded = loaded + 2
-          this.updateLoader(loaded)
-        })
+        randomNum = helper.randomize(1, limit) - 1
+        if (window.localStorage.getItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_background-${this.currentDate}-${randomNum}`)) {
+          let url = JSON.parse(window.localStorage.getItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_background-${this.currentDate}-${randomNum}`))
+          app.elements.background.style.backgroundImage = `url(${url})`
+        } else {
+          this.getData(this.generateUrl('background', randomNum)).then((result) => {
+            console.log(result)
+            let oldUrl = JSON.parse(result).results.bindings[0].img.value
+            let newUrl = this.storeBackground(oldUrl)
+            window.localStorage.setItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_background-${this.currentDate}-${randomNum}`, JSON.stringify(newUrl))
+            app.elements.background.style.backgroundImage = `url(${newUrl})`
+          })
+        }
+        loaded = loaded + 2
+        this.updateLoader(loaded)
       } else {
         this.getData(this.generateUrl('count')).then((result) => {
           limit = JSON.parse(result).results.bindings[0].count.value
+          randomNum = helper.randomize(1, limit) - 1
           window.localStorage.setItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_count`, JSON.stringify(limit))
-          console.log(`max: ${limit}`)
           loaded++
           this.updateLoader(loaded)
         }).then(() => {
           this.getData(this.generateUrl('background', helper.randomize(1, limit) - 1)).then((result) => {
-            console.log(`newRandom`)
+            window.localStorage.setItem(`${this.buildings[this.currentBuilding].name.toLowerCase()}_background-${this.currentDate}-${randomNum}`, JSON.stringify(newUrl))
             loaded++
             this.updateLoader(loaded)
           })
@@ -194,6 +220,15 @@
   const helper = {
     randomize: function (min, max) {
       return Math.floor(Math.random() * (max - min + 1) + min) // number between min and max
+    },
+    emptyElement: function (element) { // empty an html element
+      while (element.firstChild) {
+        element.removeChild(element.firstChild)
+      }
+    },
+    replaceHTML: function (element, string) { // empty html and insert new value
+      this.emptyElement(element)
+      element.insertAdjacentHTML('beforeend', string)
     }
   }
   app.init()
