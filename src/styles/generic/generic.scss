@@ -140,12 +140,12 @@ form {
   position: relative;
   left: 50%;
   top: 50%;
-  width: 150px;
-  height: 150px;
+  width: 100px;
+  height: 100px;
   margin: -75px 0 0 -75px;
   border-radius: 50%;
-  border: 3px solid transparent;
-  border-top-color: #3498db;
+  border: 10px solid transparent;
+  border-top-color: $primary-color;
   -webkit-animation: spin 2s linear infinite;
   /* Chrome, Opera 15+, Safari 5+ */
   animation: spin 2s linear infinite;
@@ -160,27 +160,11 @@ form {
   right: 5px;
   bottom: 5px;
   border-radius: 50%;
-  border: 3px solid transparent;
-  border-top-color: #e74c3c;
+  border: 10px solid transparent;
+  border-top-color: #fff;
   -webkit-animation: spin 3s linear infinite;
   /* Chrome, Opera 15+, Safari 5+ */
   animation: spin 3s linear infinite;
-  /* Chrome, Firefox 16+, IE 10+, Opera */
-}
-
-#loader:after {
-  content: "";
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  right: 15px;
-  bottom: 15px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  border-top-color: #f9c922;
-  -webkit-animation: spin 1.5s linear infinite;
-  /* Chrome, Opera 15+, Safari 5+ */
-  animation: spin 1.5s linear infinite;
   /* Chrome, Firefox 16+, IE 10+, Opera */
 }
 
@@ -227,5 +211,21 @@ form {
     /* IE 9 */
     transform: rotate(360deg);
     /* Firefox 16+, IE 10+, Opera */
+  }
+}
+@keyframes fadeOut {
+  0% {
+   opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes fadeIn {
+  0% {
+   opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }

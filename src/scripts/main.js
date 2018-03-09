@@ -28,13 +28,15 @@
     },
     createPoster: function (title, date, url, desc) {
       let newTitle = title.replace(`${api.buildings[api.currentBuilding].name}`, `<span>${api.buildings[api.currentBuilding].name}</span>`)
+      let newUrl = url.replace('level3', 'level2')
+
       let el = `
       <article class="carousel-cell">
         <div class="poster-text">
           <h1>${newTitle}</h1>
           <h1>${date}</h1>
         </div>
-        <img src="${url}">
+        <img src="${newUrl}">
       </article>
       `
       return el
@@ -244,6 +246,17 @@
     replaceHTML: function (element, string) { // empty html and insert new value
       this.emptyElement(element)
       element.insertAdjacentHTML('beforeend', string)
+    },
+    checkImg: function (imageUrl, callBack) {
+      var imageData = new Image()
+      imageData.onload = function () {
+        callBack(true)
+      }
+      imageData.onerror = function (e) {
+        e.preventDefault()
+        callBack(false)
+      }
+      imageData.src = imageUrl
     }
   }
   app.init()
