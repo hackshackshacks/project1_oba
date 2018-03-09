@@ -6,6 +6,8 @@
       background: document.querySelector('.background'),
       posters: document.querySelector('.posters')
     },
+    flkty: '',
+    isFlkty: false,
     init: function () {
       api.init()
       this.handleEvents()
@@ -24,11 +26,14 @@
         })
       })
     },
-    createPoster: function (title, date, url) {
+    createPoster: function (title, date, url, desc) {
+      let newTitle = title.replace(`${api.buildings[api.currentBuilding].name}`, `<span>${api.buildings[api.currentBuilding].name}</span>`)
       let el = `
-      <article>
-        <h1>${title}</h1>
-        <h2>${date}</h2>
+      <article class="carousel-cell">
+        <div class="poster-text">
+          <h1>${newTitle}</h1>
+          <h1>${date}</h1>
+        </div>
         <img src="${url}">
       </article>
       `
@@ -37,9 +42,17 @@
     render: function (data) {
       let posters = []
       data.forEach((item) => {
-        posters.push(this.createPoster(item.title, item.date, item.url))
+        posters += this.createPoster(item.title, item.date, item.url)
       })
+      if (this.isFlkty) {
+        this.flkty.destroy()
+      }
       helper.replaceHTML(this.elements.posters, posters)
+      let elem = document.querySelector('.main-carousel');
+      this.flkty = new Flickity(elem, {
+        wrapAround: true
+      })
+      this.isFlkty = true
     }
   }
   const api = {
@@ -142,7 +155,6 @@
         `
       }
       let encodedQuery = encodeURIComponent(query)
-      console.log(query)
       return `https://api.data.adamlink.nl/datasets/AdamNet/all/services/endpoint/sparql?default-graph-uri=&query=${encodedQuery}&format=application%2Fsparql-results%2Bjson&timeout=0&debug=on`
     },
     getData: function (url) {
@@ -212,8 +224,11 @@
       return splitUrl.join('/')
     },
     updateLoader: function (loaded) {
-      if (loaded === 3) {
+      if (loaded !== 3) {
+        document.querySelector('.main-carousel').classList.remove('show')
+      } else if (loaded === 3) {
         this.elements.loader.classList.add('hidden')
+        document.querySelector('.main-carousel').classList.add('show')
       }
     }
   }

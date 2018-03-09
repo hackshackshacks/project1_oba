@@ -1,8 +1,12 @@
 body {
   margin: 0;
   color: #fff;
+  font-family: 'Montserrat';
+  display: grid;
+  >h1 {
+    margin: 1em 0 0 1em;
+  }
 }
-
 .background {
   background: rgb(60,60,60);
   position: fixed;
@@ -13,17 +17,113 @@ body {
   background-size: cover;
   pointer-events: none;
   z-index: -1;
-  filter: grayscale(1);
+  filter: grayscale(1) brightness(60%);
 }
 form {
-  input {
+  display: grid;
+  justify-items: center;
+  margin-top: 1em;
+  div {
+    border: 0;
+    padding: 0;
+    display: inline-grid;
+    grid-gap: 2em;
+    grid-auto-flow: column;
+    input {
+      display: none;
+      &+ label {
+        padding: 1em;
+        cursor: pointer;
+        transition: all 500ms;
+      }
+      &:checked + label {
+        background: $primary-color;
+        transform:skew(-2deg,-2deg);
+      }
+    }
+    label {
+      &:hover {
+        background: rgba(255, 0, 0, 0.2);
+        transform:skew(-2deg,-2deg);
+      }
+    }
+  }
+  &.topNav {
+    margin-top: 2em;
+    label {
+      font-size: 2em;
+      text-transform: uppercase;
+    }
+  }
+}
+.main-carousel {
+  width: 60%;
+  margin: 5rem auto;
+  opacity: 0;
+  transform: translateY(2em);
+  transition: all 500ms;
+  .carousel-cell {
+    width: 100%;
+    display: grid;
+    overflow: hidden;
+    justify-items: center;
+    .poster-text, img {
+      grid-column: 1 / -1;
+      grid-row: 1 / -1;
+    }
+    img {
+      height: 40rem;
+      margin: 0 auto;
+      object-fit: contain;
+    }
+    .poster-text {
+      display: grid;
+      padding: 2em 5em;
+      align-content: end;
+      transform: translateY(100%);
+      transition: all 300ms;
+      h1 {
+        background: rgba(0,0,0,0.7);
+        padding: 1em;
+        line-height: 1.5;
+        span {
+          background: $primary-color;
+          padding: 5px;
+          display: inline-block;
+          transform:skew(-2deg,-2deg);
+        }
+      }
+    }
+  }
+  &:hover {
+    .poster-text {
+      transform: translateY(0);
+    }
+  }
+  .flickity-prev-next-button {
+    background: transparent;
+    transition: all 300ms;
+    &.next {
+      right: -50px;
+      &:hover {
+        right: -55px;
+      }
+    }
+    &.previous {
+      left: -50px;
+      &:hover {
+        left: -55px;
+      }
+    }
+    svg path{
+      fill: #fff;
+    }
+    &:hover {
+      background: transparent;
+    }
+  }
+  .flickity-page-dots {
     display: none;
-    &+ label {
-      padding: 1em;
-    }
-    &:checked + label {
-      background: red;
-    }
   }
 }
 #loader-wrapper {
@@ -86,6 +186,10 @@ form {
 
 .hidden {
   display: none;
+}
+.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @-webkit-keyframes spin {

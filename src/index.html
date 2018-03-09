@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:900" rel="stylesheet">
   <title>Document</title>
 </head>
 <body>
@@ -14,18 +15,24 @@
   <div id="loader-wrapper">
       <div id="loader"></div>
   </div>
-  <form class="topNav"> 
-    <input type="radio" id="radio-paradiso" value="0" name="building" checked><label for="radio-paradiso">Paradiso</label>
-    <input type="radio" id="radio-melkweg" value="1" name="building"><label for="radio-melkweg">Melkweg</label>
+  <h1>Imposters</h1>
+  <form class="topNav">
+    <div>
+      <input type="radio" id="radio-paradiso" value="0" name="building" checked><label for="radio-paradiso">Paradiso</label>
+      <input type="radio" id="radio-melkweg" value="1" name="building"><label for="radio-melkweg">Melkweg</label>
+    </div>
   </form>
   <form class="subNav">
-    <input type="radio" id="radio-dateOne" value="0" name="date" checked><label for="radio-dateOne">Seventies</label>
-    <input type="radio" id="radio-dateTwo" value="1" name="date"><label for="radio-dateTwo">Eighties</label>
-    <input type="radio" id="radio-dateThree" value="2" name="date"><label for="radio-dateThree">Nineties</label>
+    <div>
+      <input type="radio" id="radio-dateOne" value="0" name="date" checked><label for="radio-dateOne">Seventies</label>
+      <input type="radio" id="radio-dateTwo" value="1" name="date"><label for="radio-dateTwo">Eighties</label>
+      <input type="radio" id="radio-dateThree" value="2" name="date"><label for="radio-dateThree">Nineties</label>
+    </div>
   </form>
-  <div class="posters">
-
+  <div class="posters main-carousel">
   </div>
+  <script src="js/jquery.js"></script>
+  <script src="js/flickity.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
